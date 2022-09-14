@@ -47,8 +47,20 @@ module.exports = {
   },
   plugins: [
     new MonacoWebpackPlugin({
-      languages: ["json", "javascript", "typescript"],
+      languages: ["json", "javascript", "typescript", "c", "cpp"],
     }),
   ],
-  devServer: { contentBase: "./" },
+  devServer: { 
+    contentBase: "./",
+    port: 8886,
+    host: '0.0.0.0',
+    proxy: {
+      '/api': {
+        target: 'http://10.11.24.117:8081/',
+        pathRewrite:{
+          '^/api':''
+        }
+      }
+    }
+  },
 };
