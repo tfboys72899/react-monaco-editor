@@ -2,7 +2,7 @@
     float: left;
     width: 230.6px;
     height: 100%;
-    
+    background-color: white;
 }
 
 #editor{
@@ -27,7 +27,7 @@
 #content{
     height: 100%;
     width: 100%;
-    background-color: beige;
+    background-color: black;
 }
 
 #root{
