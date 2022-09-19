@@ -1,12 +1,10 @@
 import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space } from 'antd';
-import React, { useEffect, useMemo, useState } from 'react';
-import MonacoEditor, { MonacoDiffEditor } from "react-monaco-editor";
+import React, { useEffect, useState } from 'react';
+import MonacoEditor from "react-monaco-editor";
 import { SaveOutlined, CaretRightOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import zhCN from 'antd/es/locale/zh_CN';
 import './index.css';
-
-const { Search } = Input;
 
 const { DirectoryTree } = Tree;
 
@@ -180,13 +178,12 @@ const DocList = () => {
     }).then(res =>{
       console.log(res, "OK");
       docLoad();
-      
+      setName('');
     }, err=>{
       console.log(err, "Error");
     });
     
     setIsModalCreateFolderOpen(false);
-    setName('');
     onClose();
   }
   //新建文件
@@ -200,13 +197,12 @@ const DocList = () => {
     }).then(res =>{
       console.log(res, "OK");
       docLoad();
-      
+      setName('');
     }, err=>{
       console.log(err, "Error");
     });
     
     setIsModalCreateDocOpen(false);
-    setName('');
     onClose();
   }
   //重命名文件
@@ -217,11 +213,11 @@ const DocList = () => {
     }).then(res => {
       console.log(res, "OK");
       docLoad();
+      setName('');
     }, err=>{
       console.log(err, "Error");
     });
     setIsModalRenameOpen(false);
-    setName('');
     onClose();
   }
   //代码变更
@@ -276,13 +272,6 @@ const DocList = () => {
     <div id="content">
        <ConfigProvider locale={zhCN}>
         <div id='doclist'>
-      {/* <Search
-        style={{
-          marginBottom: 8,
-        }}
-        placeholder="Search"
-        onChange={onChange}
-      /> */}
         <DirectoryTree
           defaultExpandAll
           onExpand={onExpand}
@@ -301,9 +290,8 @@ const DocList = () => {
 
         <div id='button'>
           <Space>
+            <Button type='primary' icon={<SaveOutlined/>} onClick={saveFile}> 保存 </Button>
             <Button type='primary' icon={<CaretRightOutlined />} onClick={compile}> 编译 </Button>
-          
-          <Button type='primary' icon={<SaveOutlined/>} onClick={saveFile}> 保存 </Button>
           </Space>
           
         </div>
@@ -330,6 +318,7 @@ const DocList = () => {
         theme="vs-dark"
         value={code}
         onChange={onCodeChange}
+        disabled={true}
       />
       </div>
     
