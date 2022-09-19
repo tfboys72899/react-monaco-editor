@@ -1,4 +1,4 @@
-import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space } from 'antd';
+import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space, Form } from 'antd';
 import React, { useEffect, useState } from 'react';
 import MonacoEditor from "react-monaco-editor";
 import { SaveOutlined, CaretRightOutlined } from '@ant-design/icons';
@@ -77,6 +77,8 @@ const DocList = () => {
 
   const userId = GetRequest()['userId'];
   const applicationId = GetRequest()['applicationId'];
+
+  const [form] = Form.useForm();
 
   //获取文件树
   const docLoad = () => {
@@ -177,8 +179,8 @@ const DocList = () => {
       "userId": userId
     }).then(res =>{
       console.log(res, "OK");
+      form.resetFields();
       docLoad();
-      setName('');
     }, err=>{
       console.log(err, "Error");
     });
@@ -196,8 +198,8 @@ const DocList = () => {
       "userId": userId
     }).then(res =>{
       console.log(res, "OK");
+      form.resetFields();
       docLoad();
-      setName('');
     }, err=>{
       console.log(err, "Error");
     });
@@ -212,8 +214,8 @@ const DocList = () => {
       "name": name
     }).then(res => {
       console.log(res, "OK");
+      form.resetFields();
       docLoad();
-      setName('');
     }, err=>{
       console.log(err, "Error");
     });
@@ -298,16 +300,29 @@ const DocList = () => {
 
         <Modal title='新建文件夹' open={isModalCreateFolderOpen} onOk={createFolder} onCancel={canlcelFolder}>
           <p>请输入文件夹名字</p>
-          <Input id='FolderName' onChange={(e) => setName(document.getElementById('FolderName').value)}></Input>
+          <Form form={form} name="FN">
+            <Form.Item name="FN"  label="Folder Name">
+              <Input id='FolderName' allowClear onChange={(e) => setName(document.getElementById('FolderName').value)}></Input>
+            </Form.Item>
+          </Form>
+          
         </Modal>
         <Modal title='新建文件' open={isModalCreateDocOpen} onOk={createDoc} onCancel={canlcelDoc}>
           <p>请输入文件名</p>
-          <Input id='DocName' onChange={(e) => setName(document.getElementById('DocName').value)}></Input>
+          <Form form={form} name="DN">
+            <Form.Item name="DN" label="File name">
+              <Input id='DocName' allowClear onChange={(e) => setName(document.getElementById('DocName').value)}></Input>
+            </Form.Item>
+          </Form>
         </Modal>
         <Modal title='删除文件' open={isModalDeleteOpen} onOk={deleteFile} onCancel={() => setIsModalDeleteOpen(false)}></Modal>
         <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={() => setIsModalRenameOpen(false)}>
           <p>请输入文件/文件名</p>
-          <Input id='reName' onChange={(e) => setName(document.getElementById('reName').value)}></Input>
+          <Form form={form} name="RN">
+            <Form.Item name="RN" label="File/Folder Name">
+              <Input id='reName' allowClear onChange={(e) => setName(document.getElementById('reName').value)}></Input>
+            </Form.Item>
+          </Form> 
         </Modal>
       </div>
       <div id='editor'>
@@ -318,7 +333,6 @@ const DocList = () => {
         theme="vs-dark"
         value={code}
         onChange={onCodeChange}
-        disabled={true}
       />
       </div>
     
