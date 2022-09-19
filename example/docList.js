@@ -186,7 +186,7 @@ const DocList = () => {
     });
     
     setIsModalCreateFolderOpen(false);
-    
+    setName('');
     onClose();
   }
   //新建文件
