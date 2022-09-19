@@ -127,6 +127,7 @@ const DocList = () => {
     setCurrent_menu(e.selectedNodes[0].key);
     setCurrent_name(e.selectedNodes[0].title);
     if(e.selectedNodes[0].isLeaf === true){
+      document.getElementById('editor').style.display = '';
       axios.get('/api/details/' + e.selectedNodes[0].key,{
       }).then(res => {
         console.log(res.data);
@@ -138,6 +139,8 @@ const DocList = () => {
       }, err=> {
         console.log(err, "Error");
       });
+    } else {
+      document.getElementById('editor').style.display = 'none';
     }
     console.log(e.selectedNodes);
   };
