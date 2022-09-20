@@ -35,36 +35,12 @@ const getData = (res) => {
       children.push(getData(res.childrenNodes[i]));
     }
     children.sort((a, b) => {return a.isLeaf - b.isLeaf});
-    console.log(children);
     data.children = children;
     return data;
   }
 }
 
-const dataList = [];
-
-const getParentKey = (key, tree) => {
-  let parentKey;
-
-  for (let i = 0; i < tree.length; i++) {
-    const node = tree[i];
-
-    if (node.children) {
-      if (node.children.some((item) => item.key === key)) {
-        parentKey = node.key;
-      } else if (getParentKey(key, node.children)) {
-        parentKey = getParentKey(key, node.children);
-      }
-    }
-  }
-
-  return parentKey;
-};
-
 const DocList = () => {
-  const [expandedKeys, setExpandedKeys] = useState([]);
-  const [searchValue, setSearchValue] = useState('');
-  const [autoExpandParent, setAutoExpandParent] = useState(true);
   const [open, setOpen] = useState(false);                                                  //初始化抽屉可见控制变量
   const [isModalCreateFolderOpen, setIsModalCreateFolderOpen] = useState(false);
   const [isModalCreateDocOpen, setIsModalCreateDocOpen] = useState(false);
@@ -103,29 +79,6 @@ const DocList = () => {
     docLoad();
   }, []);
   
-  const onExpand = (newExpandedKeys) => {
-    setExpandedKeys(newExpandedKeys);
-    setAutoExpandParent(false);
-  };
-
-
-  //搜索框功能
-  const onChange = (e) => {
-    const { value } = e.target;
-    const newExpandedKeys = dataList
-      .map((item) => {
-        if (item.title.indexOf(value) > -1) {
-          return getParentKey(item.key, defaultData);
-        }
-
-        return null;
-      })
-      .filter((item, i, self) => item && self.indexOf(item) === i);
-    setExpandedKeys(newExpandedKeys);
-    setSearchValue(value);
-    setAutoExpandParent(true);
-  };
-
   //选中文件/文件夹功能
   const onSelect = (keys, e) => {
     setCurrent_menu(e.selectedNodes[0].key);
@@ -327,11 +280,8 @@ const DocList = () => {
         <DirectoryTree
           defaultExpandAll
           selectedKeys={[current_menu]}
-          onExpand={onExpand}
           onSelect={onSelect}
           onRightClick={onRightSelect}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
           treeData={globalData}
         />
         <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
