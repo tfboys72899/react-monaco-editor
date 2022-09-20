@@ -65,13 +65,14 @@ const DocList = () => {
   const [open, setOpen] = useState(false);                                                  //初始化抽屉可见控制变量
   const [isModalCreateFolderOpen, setIsModalCreateFolderOpen] = useState(false);
   const [isModalCreateDocOpen, setIsModalCreateDocOpen] = useState(false);
-  const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
   const [isModalRenameOpen, setIsModalRenameOpen] = useState(false);
   const [name, setName] = useState('');                                                     //初始化文件/文件夹名
   const [current_menu, setCurrent_menu] = useState('');                                     //初始化当前目录
+  const [temp_menu, setTemp_menu] = useState('');
   const [code, setCode] = useState('//comment');
   const [isLeaf, setIsLeaf] = useState(false);
   const [current_name, setCurrent_name] = useState('');
+  const [temp_name, setTemp_name] = useState('');
 
   const [globalData, setGlobalData] = useState([{key:'', }]);
 
@@ -148,6 +149,8 @@ const DocList = () => {
 
   //右击文件/文件夹
   const onRightSelect = (data) => {
+    setTemp_menu(current_menu);
+    setTemp_name(current_name);
     setCurrent_menu(data.node.key);
     setCurrent_name(data.node.title);
     if(data.node.isLeaf === true){
@@ -173,6 +176,11 @@ const DocList = () => {
   }
 
   //新建文件夹
+  const createFolderOpen = () => {
+    setIsModalCreateFolderOpen(true);
+    onClose();
+  }
+
   const createFolder = () => {
     console.log(name);
     axios.post('/api/folder/', {
@@ -188,11 +196,16 @@ const DocList = () => {
     }, err=>{
       console.log(err, "Error");
     });
-    
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
     setIsModalCreateFolderOpen(false);
-    onClose();
   }
   //新建文件
+  const createDocOpen = () => {
+    setIsModalCreateDocOpen(true);
+    onClose();
+  }
+
   const createDoc = () => {
     axios.post('/api/folder/', {
       "name": name,
@@ -207,12 +220,18 @@ const DocList = () => {
     }, err=>{
       console.log(err, "Error");
     });
-    
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
     setIsModalCreateDocOpen(false);
-    onClose();
   }
   //重命名文件
+  const renameOpen = () => {
+    setIsModalRenameOpen(true);
+    onClose();
+  }
+  
   const renameDoc = () => {
+    onClose();
     axios.put('/api/folder/', {
       "id": current_menu,
       "name": name
@@ -223,8 +242,9 @@ const DocList = () => {
     }, err=>{
       console.log(err, "Error");
     });
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
     setIsModalRenameOpen(false);
-    onClose();
   }
   //代码变更
   const onCodeChange = (e) => {
@@ -261,15 +281,23 @@ const DocList = () => {
 
   //删除文件
   const deleteFile = (e) => {
-    axios.delete('/api/folder/'+current_menu).then(res => {
-      console.log(res, "OK");
-      docLoad();
-    }, err=> {
-      console.log(err, "Error");
-    });
-    
-    setIsModalDeleteOpen(false);
     onClose();
+    Modal.confirm({
+      title: "删除文件/文件夹",
+      content:(
+        <p>确定要删除{current_name}吗</p>
+      ),
+      onOk: () =>{
+        axios.delete('/api/folder/'+current_menu).then(res => {
+          console.log(res, "OK");
+          docLoad();
+        }, err=> {
+          console.log(err, "Error");
+        });
+      }
+    })
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
   }
 
   //渲染
@@ -279,6 +307,7 @@ const DocList = () => {
         <div id='doclist'>
         <DirectoryTree
           defaultExpandAll
+          selectedKeys={[current_menu]}
           onExpand={onExpand}
           onSelect={onSelect}
           onRightClick={onRightSelect}
@@ -287,10 +316,10 @@ const DocList = () => {
           treeData={globalData}
         />
         <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
-          <Button type='text' onClick={() => setIsModalCreateFolderOpen(true)} disabled={isLeaf}> 新建文件夹 </Button>
-          <Button type = 'text' onClick={() => setIsModalCreateDocOpen(true)} disabled={isLeaf}> 新建文件 </Button>
-          <Button type='text' onClick={() => setIsModalDeleteOpen(true)} disabled={current_menu === globalData[0].key}> 删除 </Button>
-          <Button type='text' onClick={() => setIsModalRenameOpen(true)}> 重命名 </Button>
+          <Button type='text' onClick={createFolderOpen} disabled={isLeaf}> 新建文件夹 </Button>
+          <Button type = 'text' onClick={createDocOpen} disabled={isLeaf}> 新建文件 </Button>
+          <Button type='text' onClick={deleteFile} disabled={current_menu === globalData[0].key}> 删除 </Button>
+          <Button type='text' onClick={renameOpen}> 重命名 </Button>
         </Drawer>
 
         <div id='button'>
@@ -318,7 +347,6 @@ const DocList = () => {
             </Form.Item>
           </Form>
         </Modal>
-        <Modal title='删除文件' open={isModalDeleteOpen} onOk={deleteFile} onCancel={() => setIsModalDeleteOpen(false)}></Modal>
         <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={() => setIsModalRenameOpen(false)}>
           <p>请输入文件/文件名</p>
           <Form form={form} name="RN">
