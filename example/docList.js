@@ -51,6 +51,7 @@ const DocList = () => {
   const [code, setCode] = useState('//comment');
   const [isLeaf, setIsLeaf] = useState(false);
   const [current_name, setCurrent_name] = useState('');
+  const [current_leaf, setCurrent_leaf] = useState(true);
   const [temp_name, setTemp_name] = useState('');
 
   const [globalData, setGlobalData] = useState([{key:'', }]);
@@ -85,6 +86,7 @@ const DocList = () => {
     setCurrent_name(e.selectedNodes[0].title);
     if(e.selectedNodes[0].isLeaf === true){
       document.getElementById('editor').style.display = '';
+      setCurrent_leaf(false);
       axios.get('/api/details/' + e.selectedNodes[0].key,{
       }).then(res => {
         console.log(res.data);
@@ -98,6 +100,7 @@ const DocList = () => {
       });
     } else {
       document.getElementById('editor').style.display = 'none';
+      setCurrent_leaf(true);
       setCode('');
     }
     console.log(e.selectedNodes);
@@ -293,7 +296,7 @@ const DocList = () => {
 
         <div id='button'>
           <Space>
-            <Button type='primary' icon={<SaveOutlined/>} onClick={saveFile}> 保存 </Button>
+            <Button type='primary' icon={<SaveOutlined/>} onClick={saveFile} disabled={current_leaf}> 保存 </Button>
             <Button type='primary' icon={<CaretRightOutlined />} onClick={compile}> 编译 </Button>
           </Space>
           
