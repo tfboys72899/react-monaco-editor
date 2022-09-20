@@ -30,9 +30,12 @@ const getData = (res) => {
     data.isLeaf = true;
     return data;
   } else {
+    data.isLeaf = false;
     for(var i = 0; i < res.childrenNodes.length; i++){
       children.push(getData(res.childrenNodes[i]));
     }
+    children.sort((a, b) => {return a.isLeaf - b.isLeaf});
+    console.log(children);
     data.children = children;
     return data;
   }
