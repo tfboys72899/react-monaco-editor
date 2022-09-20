@@ -73,7 +73,7 @@ const DocList = () => {
   const [isLeaf, setIsLeaf] = useState(false);
   const [current_name, setCurrent_name] = useState('');
 
-  const [globalData, setGlobalData] = useState([]);
+  const [globalData, setGlobalData] = useState([{key:'', }]);
 
   const userId = GetRequest()['userId'];
   const applicationId = GetRequest()['applicationId'];
@@ -141,6 +141,7 @@ const DocList = () => {
       });
     } else {
       document.getElementById('editor').style.display = 'none';
+      setCode('');
     }
     console.log(e.selectedNodes);
   };
@@ -227,7 +228,6 @@ const DocList = () => {
   }
   //代码变更
   const onCodeChange = (e) => {
-    console.log(e);
     setCode(e)
   }
   //保存文件
@@ -289,7 +289,7 @@ const DocList = () => {
         <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
           <Button type='text' onClick={() => setIsModalCreateFolderOpen(true)} disabled={isLeaf}> 新建文件夹 </Button>
           <Button type = 'text' onClick={() => setIsModalCreateDocOpen(true)} disabled={isLeaf}> 新建文件 </Button>
-          <Button type='text' onClick={() => setIsModalDeleteOpen(true)}> 删除 </Button>
+          <Button type='text' onClick={() => setIsModalDeleteOpen(true)} disabled={current_menu === globalData[0].key}> 删除 </Button>
           <Button type='text' onClick={() => setIsModalRenameOpen(true)}> 重命名 </Button>
         </Drawer>
 
