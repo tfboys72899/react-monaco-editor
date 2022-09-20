@@ -165,20 +165,32 @@ const DocList = () => {
   //关闭窗口
   const onClose = () => {
     setOpen(false);
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
   }
 
   const canlcelDoc = () => {
     setIsModalCreateDocOpen(false);
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
   }
 
   const canlcelFolder = () => {
     setIsModalCreateFolderOpen(false);
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
+  }
+
+  const cancelRename = () => {
+    setIsModalRenameOpen(false);
+    setCurrent_menu(temp_menu);
+    setCurrent_name(temp_name);
   }
 
   //新建文件夹
   const createFolderOpen = () => {
     setIsModalCreateFolderOpen(true);
-    onClose();
+    setOpen(false);
   }
 
   const createFolder = () => {
@@ -203,7 +215,7 @@ const DocList = () => {
   //新建文件
   const createDocOpen = () => {
     setIsModalCreateDocOpen(true);
-    onClose();
+    setOpen(false);
   }
 
   const createDoc = () => {
@@ -227,11 +239,10 @@ const DocList = () => {
   //重命名文件
   const renameOpen = () => {
     setIsModalRenameOpen(true);
-    onClose();
+    setOpen(false);
   }
-  
+
   const renameDoc = () => {
-    onClose();
     axios.put('/api/folder/', {
       "id": current_menu,
       "name": name
@@ -281,7 +292,7 @@ const DocList = () => {
 
   //删除文件
   const deleteFile = (e) => {
-    onClose();
+    setOpen(false);
     Modal.confirm({
       title: "删除文件/文件夹",
       content:(
@@ -291,13 +302,18 @@ const DocList = () => {
         axios.delete('/api/folder/'+current_menu).then(res => {
           console.log(res, "OK");
           docLoad();
+          setCurrent_menu(temp_menu);
+          setCurrent_name(temp_name);
         }, err=> {
           console.log(err, "Error");
         });
+      },
+      onCancel: () =>{
+        setCurrent_menu(temp_menu);
+        setCurrent_name(temp_name);
       }
     })
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
+    
   }
 
   //渲染
@@ -347,7 +363,7 @@ const DocList = () => {
             </Form.Item>
           </Form>
         </Modal>
-        <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={() => setIsModalRenameOpen(false)}>
+        <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={cancelRename}>
           <p>请输入文件/文件名</p>
           <Form form={form} name="RN">
             <Form.Item name="RN" label="File/Folder Name">
