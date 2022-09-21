@@ -394,7 +394,7 @@ const DocList = () => {
       <div id='editor'>
         <MonacoEditor
         height="100%"
-        width="800px"
+        width="100%"
         language="cpp"
         theme="vs-dark"
         value={code}
