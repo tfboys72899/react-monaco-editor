@@ -20,7 +20,7 @@
 #button{
     position: absolute;
     bottom: 10px;
-    margin-left: 5%;
+    left: calc(15% - 90px);
     text-align: center;
 }
 

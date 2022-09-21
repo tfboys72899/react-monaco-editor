@@ -368,7 +368,7 @@ const DocList = () => {
         <Modal title='新建文件夹' open={isModalCreateFolderOpen} onOk={createFolder} onCancel={canlcelFolder}>
           <p>请输入文件夹名字</p>
           <Form form={form} name="FN">
-            <Form.Item name="FN"  label="Folder Name">
+            <Form.Item name="FN"  label="">
               <Input id='FolderName' allowClear onChange={(e) => setName(document.getElementById('FolderName').value)}></Input>
             </Form.Item>
           </Form>
@@ -377,7 +377,7 @@ const DocList = () => {
         <Modal title='新建文件' open={isModalCreateDocOpen} onOk={createDoc} onCancel={canlcelDoc}>
           <p>请输入文件名</p>
           <Form form={form} name="DN">
-            <Form.Item name="DN" label="File name">
+            <Form.Item name="DN" label="">
               <Input id='DocName' allowClear onChange={(e) => setName(document.getElementById('DocName').value)}></Input>
             </Form.Item>
           </Form>
@@ -385,7 +385,7 @@ const DocList = () => {
         <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={cancelRename}>
           <p>请输入文件/文件名</p>
           <Form form={form} name="RN">
-            <Form.Item name="RN" label="File/Folder Name">
+            <Form.Item name="RN" label="">
               <Input id='reName' allowClear onChange={(e) => setName(document.getElementById('reName').value)}></Input>
             </Form.Item>
           </Form> 
