@@ -1,4 +1,5 @@
-import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space, Form } from 'antd';
+import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space, Form, Menu, Dropdown } from 'antd';
+import { DataNode } from 'antd/lib/tree';
 import React, { useEffect, useState } from 'react';
 import MonacoEditor from "react-monaco-editor";
 import { SaveOutlined, CaretRightOutlined } from '@ant-design/icons';
@@ -77,6 +78,7 @@ const DocList = () => {
   
   //渲染前获取文件树
   useEffect(() => {
+    document.getElementById('editor').style.display = 'none';
     docLoad();
   }, []);
   
@@ -108,8 +110,8 @@ const DocList = () => {
 
   //右击文件/文件夹
   const onRightSelect = (data) => {
-    setTemp_menu(current_menu);
-    setTemp_name(current_name);
+    // setTemp_menu(current_menu);
+    // setTemp_name(current_name);
     setCurrent_menu(data.node.key);
     setCurrent_name(data.node.title);
     if(data.node.isLeaf === true){
@@ -122,28 +124,28 @@ const DocList = () => {
   };
 
   //关闭窗口
-  const onClose = () => {
-    setOpen(false);
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
-  }
+  // const onClose = () => {
+  //   setOpen(false);
+  //   // setCurrent_menu(temp_menu);
+  //   // setCurrent_name(temp_name);
+  // }
 
   const canlcelDoc = () => {
     setIsModalCreateDocOpen(false);
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
+    // setCurrent_menu(temp_menu);
+    // setCurrent_name(temp_name);
   }
 
   const canlcelFolder = () => {
     setIsModalCreateFolderOpen(false);
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
+    // setCurrent_menu(temp_menu);
+    // setCurrent_name(temp_name);
   }
 
   const cancelRename = () => {
     setIsModalRenameOpen(false);
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
+    // setCurrent_menu(temp_menu);
+    // setCurrent_name(temp_name);
   }
 
   //新建文件夹
@@ -191,8 +193,8 @@ const DocList = () => {
     }, err=>{
       console.log(err, "Error");
     });
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
+    // setCurrent_menu(temp_menu);
+    // setCurrent_name(temp_name);
     setIsModalCreateDocOpen(false);
   }
   //重命名文件
@@ -275,6 +277,67 @@ const DocList = () => {
     
   }
 
+  //下拉框设计
+
+  //选中item
+  const menuClick = (data) =>{
+    data.domEvent.stopPropagation();
+    switch(data.key){
+      case('folder'):{
+        createFolderOpen();
+        break;
+      }
+      case('doc'):{
+        createDocOpen();
+        break;
+      }
+      case('delete'):{
+        deleteFile();
+        break;
+      }
+      case('rename'):{
+        renameOpen();
+        break;
+      }
+    }
+  }
+
+  const menu = (
+    <Menu
+      onClick={menuClick}
+      items={[
+        {
+          key: 'folder',
+          label: '新建文件夹',
+          disabled: isLeaf,
+        },
+        {
+          key: 'doc',
+          label: '新建文件',
+          disabled: isLeaf,
+        },
+        {
+          key: 'delete',
+          label: '删除',
+          disabled :current_menu === globalData[0].key,
+        },
+        {
+          key: 'rename',
+          label: '重命名',
+        }
+      ]}
+    />
+  );
+
+  const titleRender = (nodeData) => {
+    return (
+      <Dropdown overlay={menu} trigger={['contextMenu']}>
+        <Button type='text' size='small'>{nodeData.title}</Button>
+      </Dropdown>
+    );
+  };
+
+
   //渲染
   return (
     <div id="content">
@@ -282,22 +345,22 @@ const DocList = () => {
         <div id='doclist'>
         <DirectoryTree
           defaultExpandAll
-          selectedKeys={[current_menu]}
           onSelect={onSelect}
           onRightClick={onRightSelect}
+          titleRender={titleRender}
           treeData={globalData}
         />
-        <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
+        {/* <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
           <Button type='text' onClick={createFolderOpen} disabled={isLeaf}> 新建文件夹 </Button>
           <Button type = 'text' onClick={createDocOpen} disabled={isLeaf}> 新建文件 </Button>
           <Button type='text' onClick={deleteFile} disabled={current_menu === globalData[0].key}> 删除 </Button>
           <Button type='text' onClick={renameOpen}> 重命名 </Button>
-        </Drawer>
+        </Drawer> */}
 
         <div id='button'>
           <Space>
             <Button type='primary' icon={<SaveOutlined/>} onClick={saveFile} disabled={current_leaf}> 保存 </Button>
-            <Button type='primary' icon={<CaretRightOutlined />} onClick={compile}> 编译 </Button>
+            <Button type='primary' icon={<CaretRightOutlined />} onClick={compile} disabled={current_leaf}> 编译 </Button>
           </Space>
           
         </div>
