@@ -1,22 +1,20 @@
 const MonacoWebpackPlugin = require("monaco-editor-webpack-plugin");
 const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const EncodingPlugin = require('webpack-encoding-plugin');
 
 // const MonacoEditorSrc = path.join(__dirname, "..", "src");
 
 module.exports = {
   entry: "./index.js",
-  mode: "development",
+  mode: "production",
   devtool: "source-map",
   output: {
-    path: path.join(__dirname, "./lib/t"),
-    filename: "index.js",
+    path: path.join(__dirname, "./lib/x"),
+    filename: "[name].[hash].js",
   },
   module: {
     rules: [
-      {
-        test: /\.html$/,
-        use: ["file?name=[name].[ext]"],
-      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -48,6 +46,13 @@ module.exports = {
   plugins: [
     new MonacoWebpackPlugin({
       languages: ["json", "javascript", "typescript", "c", "cpp"],
+    }),
+    new HtmlWebpackPlugin({
+      //指定模板
+      template: "./index.html",
+    }),
+    new EncodingPlugin({
+      encoding: 'UTF-8'
     }),
   ],
   devServer: { 

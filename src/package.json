@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "description": "Monaco Editor for React",
   "scripts": {
-    "start": "webpack serve --hot --inline --progress --port 8886"
+    "start": "webpack serve --hot --inline --progress --port 8886",
+    "build": "webpack",
+    "serve": "webpack serve"
   },
   "authors": [
     "Leon Shi <superRaytin@gmail.com>",
@@ -22,13 +24,16 @@
     "style-loader": "^3.3.1",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^3.11.2",
+    "webpack-encoding-plugin": "^0.3.1"
   },
   "dependencies": {
     "antd": "^4.23.1",
     "axios": "^0.27.2",
+    "html-webpack-plugin": "^5.5.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-monaco-editor": "latest"
+    "react-monaco-editor": "latest",
+    "webpack-encoding-plugin": "^0.3.1"
   }
 }
