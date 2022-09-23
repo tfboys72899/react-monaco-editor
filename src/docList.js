@@ -1,5 +1,4 @@
-import { Button, Drawer, Input, Modal, Tree, ConfigProvider, Space, Form, Menu, Dropdown } from 'antd';
-import { DataNode } from 'antd/lib/tree';
+import { Button, Input, Modal, Tree, ConfigProvider, Space, Form, Menu, Dropdown } from 'antd';
 import React, { useEffect, useState } from 'react';
 import MonacoEditor from "react-monaco-editor";
 import { SaveOutlined, CaretRightOutlined } from '@ant-design/icons';
@@ -46,7 +45,6 @@ const DocList = () => {
   const [isModalCreateFolderOpen, setIsModalCreateFolderOpen] = useState(false);
   const [isModalCreateDocOpen, setIsModalCreateDocOpen] = useState(false);
   const [isModalRenameOpen, setIsModalRenameOpen] = useState(false);
-  const [name, setName] = useState('');                                                     //初始化文件/文件夹名
   const [current_menu, setCurrent_menu] = useState('');                                     //初始化当前目录
   const [temp_menu, setTemp_menu] = useState('');
   const [code, setCode] = useState('//comment');
@@ -61,6 +59,7 @@ const DocList = () => {
   const applicationId = GetRequest()['applicationId'];
 
   const [form] = Form.useForm();
+  const [formC] = Form.useForm();
 
   //获取文件树
   const docLoad = () => {
@@ -97,6 +96,18 @@ const DocList = () => {
         }else{
           setCode(res.data.result.content);
         }
+        let path = res.data.result.out;
+        if(path === null) {
+          formC.setFieldsValue({comPath:""});
+          formC.setFieldsValue({comDoc:""});
+        } else {
+          let temp = path.split('/');
+          let d = temp[temp.length - 1];
+          let p = path.substring(0, path.length - d.length - 1);
+          formC.setFieldsValue({comPath:p});
+          formC.setFieldsValue({comDoc:d});
+        }
+        
       }, err=> {
         console.log(err, "Error");
       });
@@ -122,13 +133,6 @@ const DocList = () => {
     setOpen(true);
     console.log(current_menu);
   };
-
-  //关闭窗口
-  // const onClose = () => {
-  //   setOpen(false);
-  //   // setCurrent_menu(temp_menu);
-  //   // setCurrent_name(temp_name);
-  // }
 
   const canlcelDoc = () => {
     setIsModalCreateDocOpen(false);
@@ -182,8 +186,6 @@ const DocList = () => {
       setIsModalCreateFolderOpen(false);
     }
     
-    // setCurrent_menu(temp_menu);
-    // setCurrent_name(temp_name);
   }
   //新建文件
   const createDocOpen = () => {
@@ -239,7 +241,7 @@ const DocList = () => {
     } else {
       axios.put('/api/folder/', {
         "id": current_menu,
-        "name": name
+        "name": document.getElementById('reName').value
       }).then(res => {
         console.log(res, "OK");
         form.resetFields();
@@ -275,12 +277,45 @@ const DocList = () => {
   }
   // 编译文件
   const compile = () =>{
-    Modal.info({
-      title: "编译",
-      content:(
-        <p>文件{current_name}已完成编译并生成可执行文件</p>
-      )
-    })
+    if(document.getElementById('compilePath').value === '' || document.getElementById('compileDoc').value === ''){
+      Modal.error({
+        title: "错误",
+        content: (
+          <p>路径与文件名不能为空</p>
+        ),
+      })
+    } else {
+      saveFile();
+      let p = document.getElementById('compilePath').value;
+      let temp = p.split('\\');
+      p = '';
+      for(let i of temp){
+        p = p + i + '/';  
+      }
+      let d = document.getElementById('compileDoc').value;
+      let path = p + (p[p.length - 1] === '/' ? '' : '/') + d;
+      console.log(path);
+      axios.put('/api/details/', {
+        "id": current_menu,
+        "out": path
+      }).then(res => {
+        console.log(res, "OK");
+        Modal.success({
+          title: "编译",
+          content:(
+            <p>文件{current_name}已完成编译并生成可执行文件</p>
+          )
+        })
+      }, err => {
+        console.log(err, "Error");
+        Modal.error({
+          title: "编译",
+          content: (
+            <p>编译出现错误</p>
+          )
+        })
+      })
+    }
   }
 
   //删除文件
@@ -295,16 +330,13 @@ const DocList = () => {
         axios.delete('/api/folder/'+current_menu).then(res => {
           console.log(res, "OK");
           docLoad();
-          setCurrent_menu(temp_menu);
-          setCurrent_name(temp_name);
+          setCurrent_menu('');
+          setCurrent_name('');
+          document.getElementById('editor').style.display = 'none';
         }, err=> {
           console.log(err, "Error");
         });
       },
-      onCancel: () =>{
-        setCurrent_menu(temp_menu);
-        setCurrent_name(temp_name);
-      }
     })
     
   }
@@ -382,12 +414,6 @@ const DocList = () => {
           titleRender={titleRender}
           treeData={globalData}
         />
-        {/* <Drawer title='文件管理' placement='left' onClose={onClose} open={open} width='180px'>
-          <Button type='text' onClick={createFolderOpen} disabled={isLeaf}> 新建文件夹 </Button>
-          <Button type = 'text' onClick={createDocOpen} disabled={isLeaf}> 新建文件 </Button>
-          <Button type='text' onClick={deleteFile} disabled={current_menu === globalData[0].key}> 删除 </Button>
-          <Button type='text' onClick={renameOpen}> 重命名 </Button>
-        </Drawer> */}
 
         <div id='button'>
           <Space>
@@ -425,13 +451,29 @@ const DocList = () => {
       </div>
       <div id='editor'>
         <MonacoEditor
-        height="99.5%"
+        height="85%"
         width="99.5%"
         language="cpp"
         theme="vs-dark"
         value={code}
         onChange={onCodeChange}
       />
+        <div id='path'>
+          <Form 
+          form={formC} 
+          name='compile' 
+          size='small' 
+          labelCol={{span: 4}}
+          
+          >
+            <Form.Item name='comPath' label="编译输出路径" rules={[{ required: true, message: '请输入输出路径' }]} >
+              <Input id='compilePath' allowClear></Input>
+            </Form.Item>
+            <Form.Item name='comDoc' label='输出文件名' rules={[{ required: true, message: '请输入输出文件名' }]}>
+              <Input id='compileDoc' allowClear></Input>
+            </Form.Item>
+          </Form>
+        </div>
       </div>
     
       </ConfigProvider>
