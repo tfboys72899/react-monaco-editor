@@ -155,23 +155,35 @@ const DocList = () => {
   }
 
   const createFolder = () => {
-    console.log(name);
-    axios.post('/api/folder/', {
-      "name": name,
-      "type": "1",
-      "parentId": current_menu,
-      "applicationId": applicationId,
-      "userId": userId
-    }).then(res =>{
-      console.log(res, "OK");
-      form.resetFields();
-      docLoad();
-    }, err=>{
-      console.log(err, "Error");
-    });
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
-    setIsModalCreateFolderOpen(false);
+    if(document.getElementById('FolderName').value === ''){
+      Modal.error({
+        title: "错误",
+        content: (
+          <p>名字不能为空</p>
+        ),
+        onOk: ()=>{
+          setIsModalCreateFolderOpen(false);
+        }
+      })
+    } else {
+      axios.post('/api/folder/', {
+        "name": document.getElementById('FolderName').value,
+        "type": "1",
+        "parentId": current_menu,
+        "applicationId": applicationId,
+        "userId": userId
+      }).then(res =>{
+        console.log(res, "OK");
+        form.resetFields();
+        docLoad();
+      }, err=>{
+        console.log(err, "Error");
+      });
+      setIsModalCreateFolderOpen(false);
+    }
+    
+    // setCurrent_menu(temp_menu);
+    // setCurrent_name(temp_name);
   }
   //新建文件
   const createDocOpen = () => {
@@ -180,22 +192,32 @@ const DocList = () => {
   }
 
   const createDoc = () => {
-    axios.post('/api/folder/', {
-      "name": name,
-      "type": "2",
-      "parentId": current_menu,
-      "applicationId": applicationId,
-      "userId": userId
-    }).then(res =>{
-      console.log(res, "OK");
-      form.resetFields();
-      docLoad();
-    }, err=>{
-      console.log(err, "Error");
-    });
-    // setCurrent_menu(temp_menu);
-    // setCurrent_name(temp_name);
-    setIsModalCreateDocOpen(false);
+    if(document.getElementById('DocName').value === ''){
+      Modal.error({
+        title: "错误",
+        content: (
+          <p>名字不能为空</p>
+        ),
+        onOk: ()=>{
+          setIsModalCreateDocOpen(false);
+        }
+      })
+    } else {
+      axios.post('/api/folder/', {
+        "name": document.getElementById('DocName').value,
+        "type": "2",
+        "parentId": current_menu,
+        "applicationId": applicationId,
+        "userId": userId
+      }).then(res =>{
+        console.log(res, "OK");
+        form.resetFields();
+        docLoad();
+      }, err=>{
+        console.log(err, "Error");
+      });
+      setIsModalCreateDocOpen(false);
+    }
   }
   //重命名文件
   const renameOpen = () => {
@@ -204,19 +226,29 @@ const DocList = () => {
   }
 
   const renameDoc = () => {
-    axios.put('/api/folder/', {
-      "id": current_menu,
-      "name": name
-    }).then(res => {
-      console.log(res, "OK");
-      form.resetFields();
-      docLoad();
-    }, err=>{
-      console.log(err, "Error");
-    });
-    setCurrent_menu(temp_menu);
-    setCurrent_name(temp_name);
-    setIsModalRenameOpen(false);
+    if(document.getElementById('reName').value === ''){
+      Modal.error({
+        title: "错误",
+        content: (
+          <p>名字不能为空</p>
+        ),
+        onOk: ()=>{
+          setIsModalRenameOpen(false);
+        }
+      })
+    } else {
+      axios.put('/api/folder/', {
+        "id": current_menu,
+        "name": name
+      }).then(res => {
+        console.log(res, "OK");
+        form.resetFields();
+        docLoad();
+      }, err=>{
+        console.log(err, "Error");
+      });
+      setIsModalRenameOpen(false);
+    }
   }
   //代码变更
   const onCodeChange = (e) => {
@@ -368,8 +400,8 @@ const DocList = () => {
         <Modal title='新建文件夹' open={isModalCreateFolderOpen} onOk={createFolder} onCancel={canlcelFolder}>
           <p>请输入文件夹名字</p>
           <Form form={form} name="FN">
-            <Form.Item name="FN"  label="">
-              <Input id='FolderName' allowClear onChange={(e) => setName(document.getElementById('FolderName').value)}></Input>
+            <Form.Item name="FN"  label=""  rules={[{ required: true, message: '请输入文件夹名' }]}>
+              <Input id='FolderName' allowClear></Input>
             </Form.Item>
           </Form>
           
@@ -377,16 +409,16 @@ const DocList = () => {
         <Modal title='新建文件' open={isModalCreateDocOpen} onOk={createDoc} onCancel={canlcelDoc}>
           <p>请输入文件名</p>
           <Form form={form} name="DN">
-            <Form.Item name="DN" label="">
-              <Input id='DocName' allowClear onChange={(e) => setName(document.getElementById('DocName').value)}></Input>
+            <Form.Item name="DN" label="" rules={[{ required: true, message: '请输入文件名' }]}>
+              <Input id='DocName' allowClear></Input>
             </Form.Item>
           </Form>
         </Modal>
         <Modal title='重命名' open={isModalRenameOpen} onOk={renameDoc} onCancel={cancelRename}>
           <p>请输入文件/文件名</p>
           <Form form={form} name="RN">
-            <Form.Item name="RN" label="">
-              <Input id='reName' allowClear onChange={(e) => setName(document.getElementById('reName').value)}></Input>
+            <Form.Item name="RN" label="" rules={[{ required: true, message: '请输入文件/文件夹名' }]}>
+              <Input id='reName' allowClear></Input>
             </Form.Item>
           </Form> 
         </Modal>
