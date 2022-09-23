@@ -57,11 +57,11 @@ module.exports = {
   ],
   devServer: { 
     contentBase: "./",
-    port: 8886,
+    port: 9991,
     host: '0.0.0.0',
     proxy: {
       '/api': {
-        target: 'http://10.11.24.117:8081/',
+        target: 'http://10.11.24.117:9988/',
         pathRewrite:{
           '^/api':''
         }

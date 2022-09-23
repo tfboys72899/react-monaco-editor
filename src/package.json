@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "description": "Monaco Editor for React",
   "scripts": {
-    "start": "webpack serve --hot --inline --progress --port 8886",
+    "start": "webpack serve --hot --inline --progress --port 9991",
     "build": "webpack",
     "serve": "webpack serve"
   },
