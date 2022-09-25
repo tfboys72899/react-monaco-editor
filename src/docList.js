@@ -285,36 +285,49 @@ const DocList = () => {
         ),
       })
     } else {
-      saveFile();
       let p = document.getElementById('compilePath').value;
       let temp = p.split('\\');
       p = '';
       for(let i of temp){
         p = p + i + '/';  
       }
-      let d = document.getElementById('compileDoc').value;
-      let path = p + (p[p.length - 1] === '/' ? '' : '/') + d;
-      console.log(path);
-      axios.put('/api/details/', {
-        "id": current_menu,
-        "out": path
+      axios.post('/api/details/',{
+        "id" : current_menu,
+        "content": code,
+        "userId": userId,
+        "applicationId": applicationId
       }).then(res => {
-        console.log(res, "OK");
-        Modal.success({
-          title: "编译",
-          content:(
-            <p>文件{current_name}已完成编译并生成可执行文件</p>
-          )
+        let d = document.getElementById('compileDoc').value;
+        let path = p + (p[p.length - 1] === '/' ? '' : '/') + d;
+        console.log(path);
+        axios.put('/api/details/', {
+          "id": current_menu,
+          "out": path
+        }).then(res => {
+          console.log(res, "OK");
+          Modal.success({
+            title: "编译",
+            content:(
+              <p>文件{current_name}已完成编译并生成可执行文件</p>
+            )
+          })
+        }, err => {
+          console.log(err, "Error");
+          Modal.error({
+            title: "编译",
+            content: (
+              <p>编译出现错误</p>
+           )
+          })
         })
-      }, err => {
-        console.log(err, "Error");
+      }, err=>{
         Modal.error({
-          title: "编译",
+          title: "保存",
           content: (
-            <p>编译出现错误</p>
-          )
+            <p>保存出现错误，请重新编译</p>
+         )
         })
-      })
+      });
     }
   }
 
@@ -453,7 +466,7 @@ const DocList = () => {
         <MonacoEditor
         height="85%"
         width="99.5%"
-        language="cpp"
+        language="c"
         theme="vs-dark"
         value={code}
         onChange={onCodeChange}
