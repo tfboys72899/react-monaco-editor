@@ -1,4 +1,4 @@
-import { Button, Input, Modal, Tree, ConfigProvider, Space, Form, Menu, Dropdown } from 'antd';
+import { Button, Input, Modal, Tree, ConfigProvider, Space, Form, Menu, Dropdown, message } from 'antd';
 import React, { useEffect, useState } from 'react';
 import MonacoEditor from "react-monaco-editor";
 import { SaveOutlined, CaretRightOutlined } from '@ant-design/icons';
@@ -46,17 +46,16 @@ const DocList = () => {
   const [isModalCreateDocOpen, setIsModalCreateDocOpen] = useState(false);
   const [isModalRenameOpen, setIsModalRenameOpen] = useState(false);
   const [current_menu, setCurrent_menu] = useState('');                                     //初始化当前目录
-  const [temp_menu, setTemp_menu] = useState('');
   const [code, setCode] = useState('//comment');
   const [isLeaf, setIsLeaf] = useState(false);
   const [current_name, setCurrent_name] = useState('');
   const [current_leaf, setCurrent_leaf] = useState(true);
-  const [temp_name, setTemp_name] = useState('');
 
   const [globalData, setGlobalData] = useState([{key:'', }]);
 
   const userId = GetRequest()['userId'];
   const applicationId = GetRequest()['applicationId'];
+  const toolId = GetRequest()['toolId'];
 
   const [form] = Form.useForm();
   const [formC] = Form.useForm();
@@ -97,17 +96,7 @@ const DocList = () => {
           setCode(res.data.result.content);
         }
         let path = res.data.result.out;
-        if(path === null) {
-          formC.setFieldsValue({comPath:""});
-          formC.setFieldsValue({comDoc:""});
-        } else {
-          let temp = path.split('/');
-          let d = temp[temp.length - 1];
-          let p = path.substring(0, path.length - d.length - 1);
-          formC.setFieldsValue({comPath:p});
-          formC.setFieldsValue({comDoc:d});
-        }
-        
+        formC.setFieldsValue({comPath:path});
       }, err=> {
         console.log(err, "Error");
       });
@@ -121,8 +110,6 @@ const DocList = () => {
 
   //右击文件/文件夹
   const onRightSelect = (data) => {
-    // setTemp_menu(current_menu);
-    // setTemp_name(current_name);
     setCurrent_menu(data.node.key);
     setCurrent_name(data.node.title);
     if(data.node.isLeaf === true){
@@ -136,20 +123,14 @@ const DocList = () => {
 
   const canlcelDoc = () => {
     setIsModalCreateDocOpen(false);
-    // setCurrent_menu(temp_menu);
-    // setCurrent_name(temp_name);
   }
 
   const canlcelFolder = () => {
     setIsModalCreateFolderOpen(false);
-    // setCurrent_menu(temp_menu);
-    // setCurrent_name(temp_name);
   }
 
   const cancelRename = () => {
     setIsModalRenameOpen(false);
-    // setCurrent_menu(temp_menu);
-    // setCurrent_name(temp_name);
   }
 
   //新建文件夹
@@ -258,77 +239,98 @@ const DocList = () => {
   }
   //保存文件
   const saveFile = (e) =>{
-    axios.post('/api/details/',{
-      "id" : current_menu,
-      "content": code,
-      "userId": userId,
-      "applicationId": applicationId
-    }).then(res => {
-      console.log(res, "OK");
-      Modal.success({
-        title: "文件管理",
-        content:(
-          <p>文件{current_name}保存成功</p>
-        )
-      })
-    }, err=>{
-      console.log(err, "Error");
-    });
-  }
-  // 编译文件
-  const compile = () =>{
-    if(document.getElementById('compilePath').value === '' || document.getElementById('compileDoc').value === ''){
+    if(document.getElementById('compilePath').value === ''){
       Modal.error({
-        title: "错误",
+        title: "路径错误",
         content: (
           <p>路径与文件名不能为空</p>
         ),
       })
-    } else {
-      let p = document.getElementById('compilePath').value;
-      let temp = p.split('\\');
-      p = '';
-      for(let i of temp){
-        p = p + i + '/';  
-      }
-      axios.post('/api/details/',{
-        "id" : current_menu,
-        "content": code,
-        "userId": userId,
-        "applicationId": applicationId
-      }).then(res => {
-        let d = document.getElementById('compileDoc').value;
-        let path = p + (p[p.length - 1] === '/' ? '' : '/') + d;
-        console.log(path);
-        axios.put('/api/details/', {
-          "id": current_menu,
-          "out": path
-        }).then(res => {
-          console.log(res, "OK");
-          Modal.success({
-            title: "编译",
-            content:(
-              <p>文件{current_name}已完成编译并生成可执行文件</p>
-            )
-          })
-        }, err => {
-          console.log(err, "Error");
-          Modal.error({
-            title: "编译",
-            content: (
-              <p>编译出现错误</p>
-           )
-          })
-        })
-      }, err=>{
-        Modal.error({
-          title: "保存",
-          content: (
-            <p>保存出现错误，请重新编译</p>
-         )
-        })
-      });
+      return;
     }
+
+    let p = document.getElementById('compilePath').value;
+    let temp = p.split('\\');
+    p = ''
+    for(let i of temp){
+      p = p + i + '/';  
+    }
+    if (p.indexOf('.') === -1){
+      Modal.error({
+        title: "路径错误",
+        content: (
+          <p>路径格式不正确</p>
+        ),
+      })
+      return;
+    }
+    axios.post('/api/details/',{
+      "id" : current_menu,
+      "content": code,
+      "userId": userId,
+      "applicationId": applicationId,
+      "out": document.getElementById('compilePath').value
+    }).then(res => {
+      console.log(res, "OK");
+      message.success({
+        content:(
+          "文件"+current_name+"保存成功"
+        )
+      })
+    }, err=>{
+      console.log(err, "Error");
+    });  
+}
+  // 编译文件
+  const compile = () =>{
+    if(document.getElementById('compilePath').value === ''){
+      Modal.error({
+        title: "路径错误",
+        content: (
+          <p>路径与文件名不能为空</p>
+        ),
+      })
+      return;
+    }
+
+    let p = document.getElementById('compilePath').value;
+    let temp = p.split('\\');
+    p = ''
+    for(let i of temp){
+      p = p + i + '/';  
+    }
+    if (p.indexOf('.') === -1){
+      Modal.error({
+        title: "路径错误",
+        content: (
+          <p>路径格式不正确</p>
+        ),
+      })
+      return;
+    }
+    axios.post('/api/details/',{
+      "id" : current_menu,
+      "content": code,
+      "userId": userId,
+      "applicationId": applicationId,
+      "out": document.getElementById('compilePath').value
+    }).then(res => {
+      console.log(res, "OK");
+      axios.put('/api/details/', {
+        "id": current_menu,
+        "out": document.getElementById('compilePath').value,
+        "userId": userId,
+        "toolId": toolId
+      }).then(res => {
+        message.success(
+          "文件"+current_name+"编译成功，可执行文件保存在"+document.getElementById('compilePath').value
+        )
+      }, err => {
+        console.log(err, "Error")
+      })
+    }, err=>{
+      console.log(err, "Error");
+    });  
   }
 
   //删除文件
@@ -464,7 +466,7 @@ const DocList = () => {
       </div>
       <div id='editor'>
         <MonacoEditor
-        height="85%"
+        height="90%"
         width="99.5%"
         language="c"
         theme="vs-dark"
@@ -477,13 +479,9 @@ const DocList = () => {
           name='compile' 
           size='small' 
           labelCol={{span: 4}}
-          
           >
             <Form.Item name='comPath' label="编译输出路径" rules={[{ required: true, message: '请输入输出路径' }]} >
               <Input id='compilePath' allowClear></Input>
-            </Form.Item>
-            <Form.Item name='comDoc' label='输出文件名' rules={[{ required: true, message: '请输入输出文件名' }]}>
-              <Input id='compileDoc' allowClear></Input>
             </Form.Item>
           </Form>
         </div>
