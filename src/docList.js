@@ -45,13 +45,11 @@ const getExpand = (data) =>{
   res.push(data.id)
   for(var a of data.childrenNodes){
     res = res.concat(getExpand(a));
-    console.log(res);
   }
   return res;
 }
 
 const DocList = () => {
-  const [open, setOpen] = useState(false);                                                  //初始化抽屉可见控制变量
   const [isModalCreateFolderOpen, setIsModalCreateFolderOpen] = useState(false);
   const [isModalCreateDocOpen, setIsModalCreateDocOpen] = useState(false);
   const [isModalRenameOpen, setIsModalRenameOpen] = useState(false);
@@ -111,7 +109,6 @@ const DocList = () => {
       setCurrent_leaf(false);
       axios.get('/api/details/' + e.selectedNodes[0].key,{
       }).then(res => {
-        console.log(res.data);
         if(res.data.result === null){
           setCode('');
         }else{
@@ -127,7 +124,6 @@ const DocList = () => {
       setCurrent_leaf(true);
       setCode('');
     }
-    console.log(e.selectedNodes);
   };
 
   //右击文件/文件夹
@@ -139,8 +135,6 @@ const DocList = () => {
     } else {
       setIsLeaf(false);
     }
-    setOpen(true);
-    console.log(current_menu);
   };
 
   const canlcelDoc = () => {
@@ -158,7 +152,6 @@ const DocList = () => {
   //新建文件夹
   const createFolderOpen = () => {
     setIsModalCreateFolderOpen(true);
-    setOpen(false);
   }
 
   const createFolder = () => {
@@ -193,7 +186,6 @@ const DocList = () => {
   //新建文件
   const createDocOpen = () => {
     setIsModalCreateDocOpen(true);
-    setOpen(false);
   }
 
   const createDoc = () => {
@@ -227,7 +219,6 @@ const DocList = () => {
   //重命名文件
   const renameOpen = () => {
     setIsModalRenameOpen(true);
-    setOpen(false);
   }
 
   const renameDoc = () => {
@@ -357,7 +348,6 @@ const DocList = () => {
 
   //删除文件
   const deleteFile = (e) => {
-    setOpen(false);
     Modal.confirm({
       title: "删除文件/文件夹",
       content:(
@@ -510,7 +500,6 @@ const DocList = () => {
           </Form>
         </div>
       </div>
-    
       </ConfigProvider>
     </div>
   );

@@ -19,12 +19,6 @@
     background-color: white;
 }
 
-#contentop{
-    height: 50px;
-    width: 100%;
-    background-color: darkviolet;
-}
-
 #button{
     position: absolute;
     bottom: 3%;
