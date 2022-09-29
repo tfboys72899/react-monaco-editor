@@ -40,6 +40,16 @@ const getData = (res) => {
   }
 }
 
+const getExpand = (data) =>{
+  let res = [];
+  res.push(data.id)
+  for(var a of data.childrenNodes){
+    res = res.concat(getExpand(a));
+    console.log(res);
+  }
+  return res;
+}
+
 const DocList = () => {
   const [open, setOpen] = useState(false);                                                  //初始化抽屉可见控制变量
   const [isModalCreateFolderOpen, setIsModalCreateFolderOpen] = useState(false);
@@ -51,6 +61,9 @@ const DocList = () => {
   const [current_name, setCurrent_name] = useState('');
   const [current_leaf, setCurrent_leaf] = useState(true);
 
+  const [expand_key, setExpand_key] = useState([]);
+  const [autoExpand, setAutoExpand] = useState(true);
+
   const [globalData, setGlobalData] = useState([{key:'', }]);
 
   const userId = GetRequest()['userId'];
@@ -61,7 +74,7 @@ const DocList = () => {
   const [formC] = Form.useForm();
 
   //获取文件树
-  const docLoad = () => {
+  const docLoad = (ini=false) => {
     axios.get('/api/folder/', {
       params:{
         userId: userId,
@@ -69,6 +82,9 @@ const DocList = () => {
       }
     }).then(res => {
       setGlobalData([getData(res.data.result.data[0])]);
+      if(ini){
+        setExpand_key(getExpand(res.data.result.data[0]));
+      }
     }, err=> {
       console.log(err, "Error");
     });
@@ -77,8 +93,14 @@ const DocList = () => {
   //渲染前获取文件树
   useEffect(() => {
     document.getElementById('editor').style.display = 'none';
-    docLoad();
+    docLoad(true);
   }, []);
+
+  //展开树
+  const expand_treenode = (expandedKeys) => {
+    setExpand_key(expandedKeys);
+    setAutoExpand(false);
+  }
   
   //选中文件/文件夹功能
   const onSelect = (keys, e) => {
@@ -423,7 +445,9 @@ const DocList = () => {
        <ConfigProvider locale={zhCN}>
         <div id='doclist'>
         <DirectoryTree
-          defaultExpandAll
+          autoExpandParent={autoExpand}
+          expandedKeys={expand_key}
+          onExpand={expand_treenode}
           onSelect={onSelect}
           onRightClick={onRightSelect}
           titleRender={titleRender}
